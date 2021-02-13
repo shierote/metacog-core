@@ -1,0 +1,106 @@
+import alex from 'alex'
+import kinshiWordList from '../data/bulky_kinshi.json'
+import sexualWordList from '../data/sexual.json'
+import { Alert } from '..'
+
+const TinySegmenter = require('tiny-segmenter')
+const segmenter = new TinySegmenter()
+
+const kinshiWordSet = new Set()
+kinshiWordList.wordList.forEach((word) => {
+  kinshiWordSet.add(word)
+})
+sexualWordList.wordList.forEach((word) => {
+  kinshiWordSet.add(word)
+})
+declare global {
+  interface Window {
+    kuromojin: any
+  }
+}
+
+// window.kuromojin = {
+//   dicPath: 'https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict',
+// }
+// const linter = new window.Textlint()
+// linter.lintText('初期化用テキスト').then((res: any) => {
+//   const end = performance.now()
+//   console.log('initialize load take time', end - start)
+// })
+
+export class AnalyzeTextJob {
+  text: string
+  alerts: Alert[] = []
+  curPos: number = 0
+  id: number = 0
+
+  constructor(text: string) {
+    this.text = text
+  }
+
+  perform = async (): Promise<Alert[]> => {
+    try {
+      await this.checkJapaneseKinshiWord()
+      await this.checkEnglishInsensitiveWord()
+      // @await this.checkTextlint()
+    } catch (error) {
+      console.error('failed to analyze sentence', error)
+    }
+
+    console.info(this.text, `${this.alerts.length} errors detected!`)
+    return this.alerts
+  }
+
+  checkJapaneseKinshiWord = async (): Promise<void> => {
+    const tokens: string[] = segmenter.segment(this.text)
+
+    tokens.forEach((token) => {
+      if (kinshiWordSet.has(token)) {
+        const alertMessage = `『${token}』はリスクある単語です。`
+
+        this.alerts.push({
+          id: (this.id++).toString(),
+          startOffset: this.curPos,
+          endOffset: this.curPos + token.length,
+          message: alertMessage,
+        })
+      }
+      this.curPos += token.length
+    })
+  }
+
+  checkEnglishInsensitiveWord = async (): Promise<void> => {
+    const alexResultList = alex(this.text).messages
+
+    alexResultList.forEach((alexResult) => {
+      const token = alexResult.actual as string
+      const actualCurPos = this.text.indexOf(token as string)
+      let alertMessage = `『${token}』は不適切である可能性のある英単語です。`
+      if ((alexResult.expected as string[]).length > 0) {
+        alertMessage += `${(alexResult.expected as string[]).join(
+          ' ,'
+        )}などに置き換えてください。`
+      }
+      alertMessage += alexResult.message
+
+      this.alerts.push({
+        id: (this.id++).toString(),
+        startOffset: actualCurPos,
+        endOffset: actualCurPos + token.length,
+        message: alertMessage,
+      })
+    })
+  }
+
+  // checkTextlint = async (): Promise<void> => {
+  //   const res = await linter.lintText(this.text)
+  //   res.messages.forEach((message: any) => {
+  //     this.alerts.push({
+  //       id: (this.id++).toString(),
+  //       startOffset: message.index as number,
+  //       endOffset: message.column as number,
+  //       message: message.message,
+  //     })
+  //   })
+  // }
+}
