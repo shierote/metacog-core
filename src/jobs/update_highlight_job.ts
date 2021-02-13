@@ -20,21 +20,33 @@ export class UpdateHighlightsJob {
       }
     })
 
-    const newHighlights: Highlight[] = Object.values(this._ranges)
-      .filter((range) => {
-        return range.range.getClientRects()[0]
-      })
-      .map((range) => {
-        const rect = range.range.getClientRects()[0]
+    const newHighlights: Highlight[] =
+      process.env.NODE_ENV === 'test'
+        ? Object.values(this._ranges).map((range) => {
+            return {
+              top: 0,
+              left: 0,
+              height: 100,
+              width: 100,
+              message: range.message,
+            }
+          })
+        : Object.values(this._ranges)
 
-        return {
-          top: rect.top,
-          left: rect.left,
-          height: rect.height,
-          width: rect.width,
-          message: range.message,
-        }
-      })
+            .filter((range) => {
+              return range.range.getClientRects().item(0)
+            })
+            .map((range) => {
+              const rect = range.range.getClientRects()[0]
+
+              return {
+                top: rect.top,
+                left: rect.left,
+                height: rect.height,
+                width: rect.width,
+                message: range.message,
+              }
+            })
     this._highlights = this._highlights.concat(newHighlights)
 
     return this._highlights

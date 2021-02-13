@@ -1,18 +1,11 @@
 import alex from 'alex'
-import kinshiWordList from '../data/bulky_kinshi.json'
-import sexualWordList from '../data/sexual.json'
+import insensitiveWordSet from '../data/insensitive_word_category.json'
 import { Alert } from '..'
 
 const TinySegmenter = require('tiny-segmenter')
 const segmenter = new TinySegmenter()
 
-const kinshiWordSet = new Set()
-kinshiWordList.wordList.forEach((word) => {
-  kinshiWordSet.add(word)
-})
-sexualWordList.wordList.forEach((word) => {
-  kinshiWordSet.add(word)
-})
+insensitiveWordSet.words
 declare global {
   interface Window {
     kuromojin: any
@@ -27,6 +20,10 @@ declare global {
 //   const end = performance.now()
 //   console.log('initialize load take time', end - start)
 // })
+
+const insensitiveWordMap: { [key: string]: number } = insensitiveWordSet.words
+const insensitiveCategoryMap: { [key: number]: string } =
+  insensitiveWordSet.category
 
 export class AnalyzeTextJob {
   text: string
@@ -55,8 +52,10 @@ export class AnalyzeTextJob {
     const tokens: string[] = segmenter.segment(this.text)
 
     tokens.forEach((token) => {
-      if (kinshiWordSet.has(token)) {
-        const alertMessage = `『${token}』はリスクある単語です。`
+      const categoryIndex: number | undefined = insensitiveWordMap[token]
+      if (categoryIndex) {
+        const categoryLabel = insensitiveCategoryMap[categoryIndex]
+        const alertMessage = `『${token}』は${categoryLabel}に属する単語です。`
 
         this.alerts.push({
           id: (this.id++).toString(),

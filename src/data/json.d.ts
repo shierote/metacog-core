@@ -1,6 +1,7 @@
 declare module '@/src/data/*.json' {
   interface JsonData {
-    wordList: string[]
+    words: { [key: string]: number }
+    category: { [key: number]: string }
   }
 
   const data: JsonData
