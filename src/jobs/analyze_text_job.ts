@@ -16,7 +16,6 @@ declare global {
 // }
 // const linter = new window.Textlint()
 // linter.lintText('初期化用テキスト').then((res: any) => {
-//   const end = performance.now()
 //   console.log('initialize load take time', end - start)
 // })
 
@@ -46,7 +45,6 @@ export class AnalyzeTextJob {
       console.error('failed to analyze sentence', error)
     }
 
-    console.info(this.text, `${this.alerts.length} errors detected!`)
     return this.alerts
   }
 
@@ -58,7 +56,7 @@ export class AnalyzeTextJob {
       if (categoryIndex) {
         const categoryLabel = insensitiveCategoryMap[categoryIndex]
         const level = insensitiveLevelMap[categoryIndex]
-        const alertMessage = `『${token}』は${categoryLabel}に属する単語です。`
+        const alertMessage = `「${token}」は${categoryLabel}に関するリスクのある単語です。`
 
         this.alerts.push({
           id: (this.id++).toString(),
