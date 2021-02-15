@@ -7,13 +7,15 @@ import metacog from '..'
 test('Detect insensitive words as highlight list', async () => {
   const element = document.createElement('div')
   const textContent = document.createTextNode(
-    'アメリカ人は日本人を支配している。'
+    `まーたネトウヨさんが世界に恥さらしてんの？
+    反日野郎が
+    チョンと一緒に死ねば良いのに`
   )
   element.appendChild(textContent)
   const highlightList = await metacog(element)
   console.info(highlightList)
 
-  expect(highlightList.length).toBe(3)
+  expect(highlightList.length).toBe(6)
 })
 
 test('Detect non insensitive words', async () => {

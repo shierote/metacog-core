@@ -1,11 +1,10 @@
 import alex from 'alex'
 import insensitiveWordSet from '../data/insensitive_word_category.json'
-import { Alert } from '..'
+import { Alert, AlertLevel } from '..'
 
 const TinySegmenter = require('tiny-segmenter')
 const segmenter = new TinySegmenter()
 
-insensitiveWordSet.words
 declare global {
   interface Window {
     kuromojin: any
@@ -24,6 +23,9 @@ declare global {
 const insensitiveWordMap: { [key: string]: number } = insensitiveWordSet.words
 const insensitiveCategoryMap: { [key: number]: string } =
   insensitiveWordSet.category
+const insensitiveLevelMap = insensitiveWordSet.level as {
+  [key: number]: AlertLevel
+}
 
 export class AnalyzeTextJob {
   text: string
@@ -55,6 +57,7 @@ export class AnalyzeTextJob {
       const categoryIndex: number | undefined = insensitiveWordMap[token]
       if (categoryIndex) {
         const categoryLabel = insensitiveCategoryMap[categoryIndex]
+        const level = insensitiveLevelMap[categoryIndex]
         const alertMessage = `『${token}』は${categoryLabel}に属する単語です。`
 
         this.alerts.push({
@@ -62,6 +65,7 @@ export class AnalyzeTextJob {
           startOffset: this.curPos,
           endOffset: this.curPos + token.length,
           message: alertMessage,
+          level: level,
         })
       }
       this.curPos += token.length
@@ -87,6 +91,7 @@ export class AnalyzeTextJob {
         startOffset: actualCurPos,
         endOffset: actualCurPos + token.length,
         message: alertMessage,
+        level: 'warn',
       })
     })
   }

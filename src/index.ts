@@ -11,13 +11,15 @@ const metacog: (element: HTMLElement) => Promise<Highlight[]> = async (
 
 export default metacog
 
+export type AlertLevel = 'info' | 'warn' | 'critical'
+
 export type Highlight = {
   readonly top: number
   readonly left: number
   readonly width: number
   readonly height: number
   readonly message: string
-  readonly level: 'info' | 'warn' | 'critical'
+  readonly level: AlertLevel
 }
 
 export type Alert = {
@@ -25,4 +27,5 @@ export type Alert = {
   readonly endOffset: number
   readonly id: string
   readonly message: string
+  readonly level: AlertLevel
 }
