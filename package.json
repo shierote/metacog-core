@@ -1,6 +1,6 @@
 {
   "name": "metacog-core",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "main": "dist/index.js",
   "author": "shierote",
   "license": "MIT",
@@ -9,8 +9,8 @@
     "url": "https://github.com/shierote/metacog-core"
   },
   "scripts": {
-    "build": "tsc",
-    "prepublishOnly": "npm run build",
+    "build": "rm -rf dist && tsc",
+    "prepublishOnly": "jest && npm run build",
     "test": "jest"
   },
   "files": [

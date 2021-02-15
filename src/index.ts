@@ -17,6 +17,7 @@ export type Highlight = {
   readonly width: number
   readonly height: number
   readonly message: string
+  readonly level: 'info' | 'warn' | 'critical'
 }
 
 export type Alert = {
